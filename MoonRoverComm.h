@@ -43,9 +43,11 @@ void MoonRoverInit(void);//备注：暂无模拟读取，调试中使用串口0�
 int checkSum(int sum);
 void writeHEX(int num,int com);
 
-void getTeleComm(void);
+void getTeleComm2(void);
+void getTeleComm3(void);
+
 void orderData(void);
 u8 getData(void);
-
+u8 takePhoto(void);
 
 #endif

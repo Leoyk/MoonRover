@@ -70,13 +70,13 @@ void printMotorDataHex(void){
     Serial2.write(MOTOR_TYPE);    
   //数据 
     //车轮1角度
-    writeHEX(wheelAngel_1,2);
+    writeHEX(angLF,2);
     //车轮2角度
-    writeHEX(wheelAngel_2,2);
+    writeHEX(angLB,2);
     //车轮3角度
-    writeHEX(wheelAngel_3,2);
+    writeHEX(angRF,2);
     //车轮4角度
-    writeHEX(wheelAngel_4,2);
+    writeHEX(angRB,2);
     
     //车轮1速度
     writeHEX(wheelSpeed_1,2);
