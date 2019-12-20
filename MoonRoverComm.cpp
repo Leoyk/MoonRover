@@ -6,7 +6,12 @@
 int comm3buff[200];
 int comm2buff[200];
 
+int takePicOkFlag = 0;
 volatile int camFlag = 0;
+long camLen = 0;
+int camDataCnt = 0;
+int _Xval,_Yval;
+
 float tempVal;
 long disVal;
 float spdVal;
@@ -19,16 +24,30 @@ void MoonRoverInit(void){
 	
 }
 
+void clearBuf(int a){
+	if(a == 2){
+		for(int i = 0;i < 200; i ++)
+			comm2buff[i] = 0;	
+	}
+	if(a == 3){
+		for(int i = 0;i < 200; i ++)
+			comm3buff[i] = 0;	
+	}
+	
+}
+
 void getTeleComm2(void){  
-  int buf,_Xval,_Yval;
+  int buf;
   long ck;
   int rx2cnt = 0;
 
 
   while(Serial2.available()){
     buf = Serial2.read();
-    Serial.print(buf,HEX);/////////不知道为什么不加运行不对
-    Serial.print("\t");
+	Serial3.write(buf);
+	
+//    Serial.print(buf,HEX);/////////不知道为什么不加运行不对
+//    Serial.print("\t");
 
     
     if(buf == 0xFA){//接收到帧头 
@@ -50,9 +69,9 @@ void getTeleComm2(void){
           if(comm2buff[1] == 0x02){//motor ctr
             _Xval = (int)((char)comm2buff[2]);
             _Yval = (int)((char)comm2buff[3]);
-//            Serial.print(_Xval);
-//            Serial.print("\t");
-//            Serial.println(_Yval);
+            Serial.print(_Xval);
+            Serial.print("\t");
+            Serial.println(_Yval);
           }
           else if(comm2buff[1] == 0x03){//photo ctr
             camFlag = 1;
@@ -75,79 +94,109 @@ void getTeleComm2(void){
 }
 
 void getTeleComm3(void){  
-  int buf;
-  
+  int buf,i = 0;
+  static int flag = 0;
+  clearBuf(3);
   while(Serial3.available()){
     buf = Serial3.read();
     Serial2.write(buf);
-  }
+	
+	if(camFlag){
+		if(buf == 0xfb){
+			flag = 1;
+		}
+		else if((flag == 1) && (buf == 0xFF)){
+			flag = 2;
+		}
+		else if((flag == 2) && (buf == 0xBF)){
+			flag = 0;
+			camFlag = 0;
+		}
+		else{
+			flag = 0;
+		}
+	}
+	
+	comm3buff[i] = buf;
+	i ++;
+  }	
 }
 
 
 
 
 u8 getData(void){
-	return 0;
+
+	long ck;
 	
-}
-
-/*	
-	// long ck;
-	// const u8 buf[5] = {0xFA,0X03,0X00,0X03,0XAF};
-	
- 	// if((comm2buff[0] == 0xFA) && (comm2buff[1] == 0x03) && (comm2buff[2] == 0x00) && (comm2buff[3] == 0x03) && (comm2buff[4] == 0xAF)){
-			// camFlag = 1;
-			
-			// for(int i = 0;i < 5;i ++){
-				// Serial3.write(buf[i]);	
-			// }
-			// clearBuff(2);
-	// }else{
-		// camFlag = 0;//不是拍照指令则清除标志位
+	if((comm3buff[0] == 0xFB) && (comm3buff[1] == 0xFF)){
 		
-	// }
-
-	// if((comm3buff[0] == 0xFB) && (comm3buff[1] == 0xFF)){
-		
-		// if(comm3buff[2] == 0xBF){
-			// camFlag = 0;//拍照结束
-		// }
-		
-		// ck = 0;	
-		// for(int i = 1;i < 22;i ++){
-			// ck += comm3buff[i];
-		// }
-
-		// ck &= 0xff;
-		// if(ck == comm3buff[22]){
-			// spdVal = ((comm3buff[3] << 8) + comm3buff[2]) * 0.0175924;
-			// tempVal = (float)((comm3buff[5] << 8) + comm3buff[4])/10;
-			// disVal = (comm3buff[7] << 8) + comm3buff[6];
-			
-			// angLF = (comm3buff[15] << 8) + comm3buff[14];
-			// angLB = (comm3buff[17] << 8) + comm3buff[16];
-			// angRF = (comm3buff[19] << 8) + comm3buff[18];
-			// angRB = (comm3buff[21] << 8) + comm3buff[20];
-		// return 1; 
-		// }else{
-
-		// }
-	// }
-		// return 0; 
-// }
-
-*/
-
-
-
-u8 takePhoto(void){
-	int orderData[5] = {0xfa,0x03,0x0,0x03,0xaf};
-	
-		for(int i = 0;i < 5;i ++){
-			Serial3.write(orderData[i]);
+		if(comm3buff[2] == 0xBF){
+			camFlag = 0;//拍照结束
 		}
-	return 0;
+		
+		ck = 0;	
+		for(int i = 1;i < 22;i ++){
+			ck += comm3buff[i];
+		}
+
+		ck &= 0xff;
+		if(ck == comm3buff[22]){
+			spdVal = ((comm3buff[3] << 8) + comm3buff[2]) * 0.0175924;
+			tempVal = (float)((comm3buff[5] << 8) + comm3buff[4])/10;
+			disVal = (comm3buff[7] << 8) + comm3buff[6];
+			
+			angLF = (comm3buff[15] << 8) + comm3buff[14];
+			angLB = (comm3buff[17] << 8) + comm3buff[16];
+			angRF = (comm3buff[19] << 8) + comm3buff[18];
+			angRB = (comm3buff[21] << 8) + comm3buff[20];
+		clearBuf(3);	
+		return 1; 
+		}
+	}
+	
+	else if((comm3buff[0] == 0xFB) && (comm3buff[1] == 0x30)){
+		ck = 0;	
+		for(int ick = 1;ick < 7;ick ++){
+			ck += comm3buff[ick];
+		}
+
+		ck &= 0xff;
+		if(ck == comm3buff[7]){
+			if(comm3buff[2] == 0x02){
+				takePicOkFlag = 1;	
+				
+			Serial.print(comm3buff[3],HEX);
+			Serial.print("\t");
+			Serial.print(comm3buff[4],HEX);
+			Serial.println("\t");
+			
+			camLen = ((comm3buff[4] << 8) + comm3buff[3]);
+			
+			clearBuf(2);
+			return 2; 	
+			}
+		}
+		else{
+			takePicOkFlag = 0;
+			for(int idata = 0;idata < 12;idata ++){
+				Serial.print(comm3buff[idata],HEX);
+				Serial.print("\t");
+			}
+			Serial.print("\n");
+			}
+		
+	}
+	
+	
+	
+	
+		return 0; 
 }
+
+
+
+
 
 
 

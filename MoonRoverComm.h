@@ -48,6 +48,5 @@ void getTeleComm3(void);
 
 void orderData(void);
 u8 getData(void);
-u8 takePhoto(void);
 
 #endif

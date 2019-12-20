@@ -9,5 +9,5 @@ int getLfAngle();
 int getLbAngle();
 int getRfAngle();
 int getRbAngle();
-
+void ctrCar(void);
 #endif

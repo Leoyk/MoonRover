@@ -4,6 +4,7 @@
 
 extern float spdVal;
 extern int angLF,angLB,angRF,angRB;
+extern int _Xval,_Yval;
 
 //--------------------系统变量定义区-----------------------
 //4个电机的角度，角度 
@@ -12,7 +13,72 @@ int wheelAngel_1, wheelAngel_2, wheelAngel_3, wheelAngel_4;
 //6个电机速度，
 int wheelSpeed_1, wheelSpeed_2, wheelSpeed_3, wheelSpeed_4, wheelSpeed_5, wheelSpeed_6;
 
+int spd,ang,dirS,dirA;
 
+void ctrCar(void){
+
+        spd = (_Yval / abs(_Yval)) * map(abs(_Yval),0,126,0,100);
+        wheelSpeed_1 = spd;
+        wheelSpeed_2 = spd;
+        wheelSpeed_3 = spd;
+        wheelSpeed_4 = spd;
+        wheelSpeed_5 = spd;
+        wheelSpeed_6 = spd;
+      
+      
+        if(abs(_Xval) > 100){//原地转向
+            ang = 45;
+            spd = (_Xval/abs(_Xval)) * map(abs(_Xval),100,126,0,50);
+           
+            wheelAngel_1 = ang;
+            wheelAngel_2 = -ang;
+            wheelAngel_3 = -ang;
+            wheelAngel_4 = ang; 
+        
+            wheelSpeed_1 = spd;
+            wheelSpeed_2 = -spd;
+            wheelSpeed_3 = spd;
+            wheelSpeed_4 = -spd;
+            wheelSpeed_5 = spd;
+            wheelSpeed_6 = -spd;   
+      
+         }else if(abs(_Xval) > 20){
+            ang = (_Xval/abs(_Xval)) * map(abs(_Xval),20,50,0,45);
+
+            if(_Yval > 0){
+            wheelAngel_1 = ang;
+            wheelAngel_2 = ang;
+            wheelAngel_3 = 0;
+            wheelAngel_4 = 0; 
+            }else if(_Yval < 0){
+            wheelAngel_1 = 0;
+            wheelAngel_2 = 0;
+            wheelAngel_3 = ang;
+            wheelAngel_4 = ang; 
+            }
+            
+            wheelSpeed_1 = spd;
+            wheelSpeed_2 = spd;
+            wheelSpeed_3 = spd;
+            wheelSpeed_4 = spd;
+            wheelSpeed_5 = spd;
+            wheelSpeed_6 = spd;  
+          }else{
+            ang = 0; 
+            
+            wheelAngel_1 = ang;
+            wheelAngel_2 = ang;
+            wheelAngel_3 = ang;
+            wheelAngel_4 = ang;   
+            
+            wheelSpeed_1 = spd;
+            wheelSpeed_2 = spd;
+            wheelSpeed_3 = spd;
+            wheelSpeed_4 = spd;
+            wheelSpeed_5 = spd;
+            wheelSpeed_6 = spd;  
+          } 
+}
 
 
 /*
@@ -72,9 +138,9 @@ void printMotorDataHex(void){
     //车轮1角度
     writeHEX(angLF,2);
     //车轮2角度
-    writeHEX(angLB,2);
-    //车轮3角度
     writeHEX(angRF,2);
+    //车轮3角度
+    writeHEX(angLB,2);
     //车轮4角度
     writeHEX(angRB,2);
     
