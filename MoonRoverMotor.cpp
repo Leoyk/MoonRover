@@ -163,9 +163,22 @@ void printMotorDataHex(void){
 
 //帧尾
   Serial2.write(0xBF);
+  
+  sendSpd();
   }
 
 
+
+void sendSpd(void){
+	int buf[6] = {0xFB,0X61,0,0,0,0XBF};
+	buf[2] = (int)(spdVal * 100) & 0xff;
+	buf[3] = (int)(spdVal * 100) >> 8;
+	buf[4] = (buf[1] + buf[2] +buf[3]) & 0xFF;
+
+  for(int i = 0; i < 6;i ++){
+	Serial2.write(buf[i]);
+  }
+}
 
 
 

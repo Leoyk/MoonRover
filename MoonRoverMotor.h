@@ -10,4 +10,5 @@ int getLbAngle();
 int getRfAngle();
 int getRbAngle();
 void ctrCar(void);
+void sendSpd(void);
 #endif
