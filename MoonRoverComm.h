@@ -47,6 +47,6 @@ void getTeleComm2(void);
 void getTeleComm3(void);
 
 void orderData(void);
-u8 getData(void);
+int getData(void);
 
 #endif
