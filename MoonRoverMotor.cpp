@@ -17,14 +17,16 @@ int spd,ang,dirS,dirA;
 
 void ctrCar(void){
 
-        spd = (_Yval / abs(_Yval)) * map(abs(_Yval),0,126,0,100);
-        wheelSpeed_1 = spd;
-        wheelSpeed_2 = spd;
-        wheelSpeed_3 = spd;
-        wheelSpeed_4 = spd;
-        wheelSpeed_5 = spd;
-        wheelSpeed_6 = spd;
-      
+float arr = 0.7;//比例
+
+
+        if(abs(_Yval) < 10){
+            spd = 0;
+        }
+        else{
+            spd = (_Yval / abs(_Yval)) * map(abs(_Yval),0,126,0,100);            
+        }
+
       
         if(abs(_Xval) > 100){//原地转向
             ang = 45;
@@ -42,30 +44,61 @@ void ctrCar(void){
             wheelSpeed_5 = spd;
             wheelSpeed_6 = -spd;   
       
-         }else if(abs(_Xval) > 20){
-            ang = (_Xval/abs(_Xval)) * map(abs(_Xval),20,50,0,45);
+         }
+        else if(abs(_Xval) > 10){
+            ang = (_Xval/abs(_Xval)) * map(abs(_Xval),10,100,0,45);
 
-            if(_Yval > 0){
+
+            if(_Yval > 10){
             wheelAngel_1 = ang;
             wheelAngel_2 = ang;
             wheelAngel_3 = 0;
             wheelAngel_4 = 0; 
-            }else if(_Yval < 0){
+
+                if(ang > 0){//右转
+                    wheelSpeed_1 = spd;
+                    wheelSpeed_2 = spd * arr;
+                    wheelSpeed_3 = spd;
+                    wheelSpeed_4 = spd * arr;
+                    wheelSpeed_5 = spd;
+                    wheelSpeed_6 = spd * arr;
+                }
+                else{//左转
+                    wheelSpeed_1 = spd * arr;
+                    wheelSpeed_2 = spd;
+                    wheelSpeed_3 = spd * arr;
+                    wheelSpeed_4 = spd;
+                    wheelSpeed_5 = spd * arr;
+                    wheelSpeed_6 = spd;
+                }
+            }
+        else if(_Yval < -10){
             wheelAngel_1 = 0;
             wheelAngel_2 = 0;
             wheelAngel_3 = ang;
             wheelAngel_4 = ang; 
+
+                if(ang < 0){//左转
+                    wheelSpeed_1 = spd;
+                    wheelSpeed_2 = spd * arr;
+                    wheelSpeed_3 = spd;
+                    wheelSpeed_4 = spd * arr;
+                    wheelSpeed_5 = spd;
+                    wheelSpeed_6 = spd * arr;
+                }
+                else{//右转
+                    wheelSpeed_1 = spd * arr;
+                    wheelSpeed_2 = spd;
+                    wheelSpeed_3 = spd * arr;
+                    wheelSpeed_4 = spd;
+                    wheelSpeed_5 = spd * arr;
+                    wheelSpeed_6 = spd;
+                }
             }
             
-            wheelSpeed_1 = spd;
-            wheelSpeed_2 = spd;
-            wheelSpeed_3 = spd;
-            wheelSpeed_4 = spd;
-            wheelSpeed_5 = spd;
-            wheelSpeed_6 = spd;  
           }else{
             ang = 0; 
-            
+            spd = 0;
             wheelAngel_1 = ang;
             wheelAngel_2 = ang;
             wheelAngel_3 = ang;
