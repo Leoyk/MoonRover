@@ -4,6 +4,7 @@
 
 extern int comm3buff[200];
 extern int takePicOkFlag;
+extern int camFlag;
 extern long camLen;
 extern int camDataCnt;
 /*
@@ -26,6 +27,16 @@ extern int camDataCnt;
 int takePhoto(void){
 	long buf;
 	const int takePic[5] = {0xfa,0x03,0x00,0x03,0xaf};
+	camFlag = 1;
+
+	// Serial.print("take photo...\n");
+	// camFlag = 1;
+	// for(int i = 0;i < 5;i ++){
+	// 	Serial3.write(takePic[i]);
+	// }
+
+
+
 	while(takePicOkFlag == 0){//未拍照成功则持续发送
 		for(int i = 0;i < 5;i ++){
 			Serial3.write(takePic[i]);
@@ -33,15 +44,18 @@ int takePhoto(void){
 	delay(2000);//等待拍照完成
 		getTeleComm3();
 		getData();
+
+	Serial.print("Retry...\n");
 	}
+
 	buf = camLen/128;
 	
 	if(buf * 128 < camLen){
 		buf ++;
 	}
-	
+
 	return (int)buf;
-	Serial.print("PIC OK\n");
+
 }
 
 int orderPicData(int num){
