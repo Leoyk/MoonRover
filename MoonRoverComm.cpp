@@ -76,9 +76,10 @@ void getTeleComm2(void){
             Serial.print(_Xval);
             Serial.print("\t");
             Serial.println(_Yval);   
-            
+////////////////////////////////////////////////////////////手动模式下开启下列功能          
             ctrCar();
             cmdMotor(); 
+////////////////////////////////////////////////////////////
           }
           else if(comm2buff[1] == 0x03){//photo ctr
             camFlag = 1;
