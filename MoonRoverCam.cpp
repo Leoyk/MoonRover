@@ -29,30 +29,30 @@ int takePhoto(void){
 	const int takePic[5] = {0xfa,0x03,0x00,0x03,0xaf};
 	camFlag = 1;
 
-	// Serial.print("take photo...\n");
-	// camFlag = 1;
-	// for(int i = 0;i < 5;i ++){
-	// 	Serial3.write(takePic[i]);
+	Serial.print("take photo...\n");
+
+	for(int i = 0;i < 5;i ++){
+		Serial3.write(takePic[i]);
+	}
+
+
+
+	// while(takePicOkFlag == 0){//未拍照成功则持续发送
+	// 	for(int i = 0;i < 5;i ++){
+	// 		Serial3.write(takePic[i]);
+	// 	}
+	// delay(2000);//等待拍照完成
+	// 	getTeleComm3();
+	// 	getData();
+
+	// Serial.print("Retry...\n");
 	// }
 
-
-
-	while(takePicOkFlag == 0){//未拍照成功则持续发送
-		for(int i = 0;i < 5;i ++){
-			Serial3.write(takePic[i]);
-		}
-	delay(2000);//等待拍照完成
-		getTeleComm3();
-		getData();
-
-	Serial.print("Retry...\n");
-	}
-
-	buf = camLen/128;
+	// buf = camLen/128;
 	
-	if(buf * 128 < camLen){
-		buf ++;
-	}
+	// if(buf * 128 < camLen){
+	// 	buf ++;
+	// }
 
 	return (int)buf;
 
