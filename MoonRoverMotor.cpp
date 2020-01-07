@@ -98,7 +98,7 @@ float arr = 0.7;//比例
             
           }else{
             ang = 0; 
-            spd = 0;
+ //           spd = 0;
             wheelAngel_1 = ang;
             wheelAngel_2 = ang;
             wheelAngel_3 = ang;
