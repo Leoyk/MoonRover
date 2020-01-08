@@ -2,8 +2,8 @@
 #include "Arduino.h"
 #include "MoonRoverComm.h"
 
-extern long disVal;
+extern float disVal;
 
-long getDistant(void){
+float getDistant(void){
 	  return disVal;
 }

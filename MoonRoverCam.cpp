@@ -4,7 +4,7 @@
 
 extern int comm3buff[200];
 extern int takePicOkFlag;
-extern int camFlag;
+extern int __camFlag;
 extern long camLen;
 extern int camDataCnt;
 /*
@@ -27,7 +27,7 @@ extern int camDataCnt;
 int takePhoto(void){
 	long buf;
 	const int takePic[5] = {0xfa,0x03,0x00,0x03,0xaf};
-	camFlag = 1;
+	__camFlag = 1;
 
 	Serial.print("take photo...\n");
 

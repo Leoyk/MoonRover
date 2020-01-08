@@ -2,25 +2,33 @@
 #include "MoonRoverComm.h"
 #include "MoonRoverVolt.h"
 #include "MoonRoverMotor.h"
+#include "MoonRover.h"
+
+
 
 int comm3buff[200];
 int comm2buff[200];
 
-
+int autoBuf[5] = {0xFB,0x01,0x00,0x01,0xBF};
+int menuBuf[5] = {0xFB,0x01,0x01,0x02,0xBF};
 
 int takePicOkFlag = 0;
-volatile int camFlag = 0;
+extern volatile int __camFlag;
+extern volatile int __autoFlag;
+
+
 long camLen = 0;
 int camDataCnt = 0;
 int _Xval,_Yval;
 
 float tempVal;
-long disVal;
+float disVal;
 float spdVal;
 int angLF,angLB,angRF,angRB;
 float _yaw,_pit,_rol;
 
 void MoonRoverInit(void){
+  Serial1.begin(115200);
   Serial2.begin(115200);
   Serial3.begin(115200);
 }
@@ -42,26 +50,30 @@ void getTeleComm2(void){
   int buf;
   long ck;
   int rx2cnt = 0;
-
+ 
 
   while(Serial2.available()){
     buf = Serial2.read();
     Serial3.write(buf);
 
-    if(camFlag != 1){
-      Serial.print(buf,HEX);/////////不知道为什么不加运行不对
-      Serial.print("\t");  
+    if(__camFlag != 1){
+       Serial1.print(buf,HEX);/////////不知道为什么不加运行不对
+       Serial1.print("\t");  
     }
 
     
     if(buf == 0xFA){//接收到帧头 
-      rx2cnt = 0;  
+      rx2cnt = 0;
       comm2buff[rx2cnt] = buf;
       }
-      
-    else if(buf == 0xAF){//接收到帧尾
+
+    
+
+    if(buf == 0xAF){//接收到帧尾
       comm2buff[rx2cnt] = buf;
-      
+
+
+
       ck = 0;
       for(int j = 1; j < rx2cnt - 1; j ++){
        ck += comm2buff[j];
@@ -73,17 +85,32 @@ void getTeleComm2(void){
           if(comm2buff[1] == 0x02){//motor ctr
             _Xval = (int)((char)comm2buff[2]);
             _Yval = (int)((char)comm2buff[3]);
-            Serial.print(_Xval);
-            Serial.print("\t");
-            Serial.println(_Yval);   
+            Serial1.print(_Xval);
+            Serial1.print("\t");
+            Serial1.println(_Yval);   
 ////////////////////////////////////////////////////////////手动模式下开启下列功能          
             ctrCar();
             cmdMotor(); 
 ////////////////////////////////////////////////////////////
           }
           else if(comm2buff[1] == 0x03){//photo ctr
-            camFlag = 1;
+
+            __camFlag = 1;
             Serial.println("Take photo...");
+            }
+          else if(comm2buff[1] == 0x01){//auto drive or menual(defualt)
+              if(comm2buff[2] == 0){//auto
+               __autoFlag = 1; 
+               for(int ib = 0;ib < 5;ib ++){
+                Serial2.write(autoBuf[ib]);
+               }
+              }
+              else if(comm2buff[2] == 1){
+               __autoFlag = 0;     
+               for(int ib = 0;ib < 5;ib ++){
+                Serial2.write(menuBuf[ib]);
+               }
+              }
             }
         }
       else{    
@@ -109,9 +136,9 @@ void getTeleComm3(void){
   while(Serial3.available()){
     buf = Serial3.read();
     Serial2.write(buf); 
-    if(camFlag != 1){
-      Serial.print(buf,HEX);/////////不知道为什么不加运行不对
-      Serial.print("\t");  
+    if(__camFlag != 1){
+      Serial1.print(buf,HEX);/////////不知道为什么不加运行不对
+      Serial1.print("\t");  
     }
     
 
@@ -119,7 +146,7 @@ void getTeleComm3(void){
     comm3buff[rx3cnt] = buf;
     rx3cnt ++;
 
-    if(camFlag){
+    if(__camFlag){
       if(buf == 0xfb){
         flag = 1;
       }
@@ -128,7 +155,7 @@ void getTeleComm3(void){
       }
       else if((flag == 2) && (buf == 0xBF)){
         flag = 0;
-        camFlag = 0;
+        __camFlag = 0;
       }
       else{
         flag = 0;
@@ -164,8 +191,8 @@ int getData(void){
     ck &= 0xff;
     if(ck == comm3buff[22]){
       spdVal = ((comm3buff[3] << 8) + comm3buff[2]) * 0.0175924;
-      tempVal = (float)((comm3buff[5] << 8) + comm3buff[4])/10;
-      disVal = (comm3buff[7] << 8) + comm3buff[6];
+      tempVal = (float)(((comm3buff[5] << 8) + comm3buff[4]) * 10)/10.0;
+      disVal = ((comm3buff[7] << 8) + comm3buff[6]) / 10.0;
 	  
       _yaw = ((comm3buff[9] << 8) + comm3buff[8]) / 10.0;
       _pit = ((comm3buff[11] << 8) + comm3buff[10]) / 10.0;
@@ -177,6 +204,10 @@ int getData(void){
       angLB = (comm3buff[17] << 8) + comm3buff[16];
       angRF = (comm3buff[19] << 8) + comm3buff[18];
       angRB = (comm3buff[21] << 8) + comm3buff[20];
+
+      printMotorDataHex();
+
+
     clearBuf(3);  
     return 1; 
     }

@@ -8,12 +8,12 @@ extern int _Xval,_Yval;
 
 //--------------------系统变量定义区-----------------------
 //4个电机的角度，角度 
-int wheelAngel_1, wheelAngel_2, wheelAngel_3, wheelAngel_4; 
+ int wheelAngel_1, wheelAngel_2, wheelAngel_3, wheelAngel_4; 
 
 //6个电机速度，
-int wheelSpeed_1, wheelSpeed_2, wheelSpeed_3, wheelSpeed_4, wheelSpeed_5, wheelSpeed_6;
+ int wheelSpeed_1, wheelSpeed_2, wheelSpeed_3, wheelSpeed_4, wheelSpeed_5, wheelSpeed_6;
 
-int spd,ang,dirS,dirA;
+ int spd,ang,dirS,dirA;
 
 void ctrCar(void){
 
@@ -163,7 +163,7 @@ void cmdMotor(void){
  * 返回值：无
  * 备注：测试中使用串口0
 */
-void printMotorDataHex(void){
+static void printMotorDataHex(void){
   Serial2.write(0xFB);
   //帧类型
     Serial2.write(MOTOR_TYPE);    

@@ -4,7 +4,7 @@
 
 //获得并上传距离
 
-long getDistant(void);
+float getDistant(void);
 
 
 
