@@ -17,10 +17,10 @@ extern int _Xval,_Yval;
 
 void ctrCar(void){
 
-float arr = 0.7;//比例
+float arr = 0.8;//比例
 
 
-        if(abs(_Yval) < 10){
+        if(abs(_Yval) < 20){
             spd = 0;
         }
         else{
@@ -28,9 +28,9 @@ float arr = 0.7;//比例
         }
 
       
-        if(abs(_Xval) > 100){//原地转向
+        if(abs(_Xval) > 80){//原地转向
             ang = 45;
-            spd = (_Xval/abs(_Xval)) * map(abs(_Xval),100,126,0,50);
+            spd = (_Xval/abs(_Xval)) * map(abs(_Xval),80,126,0,80);
            
             wheelAngel_1 = ang;
             wheelAngel_2 = -ang;
@@ -46,10 +46,10 @@ float arr = 0.7;//比例
       
          }
         else if(abs(_Xval) > 10){
-            ang = (_Xval/abs(_Xval)) * map(abs(_Xval),10,100,0,45);
+            ang = (_Xval/abs(_Xval)) * map(abs(_Xval),10,80,0,45);
 
 
-            if(_Yval > 10){
+            if(_Yval > 20){
             wheelAngel_1 = ang;
             wheelAngel_2 = ang;
             wheelAngel_3 = 0;
@@ -72,7 +72,7 @@ float arr = 0.7;//比例
                     wheelSpeed_6 = spd;
                 }
             }
-        else if(_Yval < -10){
+        else if(_Yval < -20){
             wheelAngel_1 = 0;
             wheelAngel_2 = 0;
             wheelAngel_3 = ang;
