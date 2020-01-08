@@ -1,5 +1,31 @@
 #include "MoonRover.h"
 #include "Arduino.h"
+#include "MoonRoverInc.h"
+
+
+
+static struct pt 
+  thread1, //
+  thread2;
+
+
+
+
+volatile  int __camFlag = 0;//拍照忙标志
+volatile int __autoFlag = 0;
+unsigned long __timeFlag;
+unsigned long __timeFlagTele;
+int __motorFlag = 0;
+int __changeModeFlag = 0;
+
+
+
+
+
+
+
+
+
 
 
 /*
@@ -16,12 +42,210 @@
 */
 void __MoonRoverInit(void){
 
-  MoonRoverInit();
-  Serial.begin(115200);
-  Serial.println("MoonRover begin...");
+  PT_INIT(&thread1);
+  PT_INIT(&thread2);  
 
+  MoonRoverInit();
+  Serial.println("MoonRover begin...");
+  __timeFlag = millis();
+  __timeFlagTele = millis();
 }
 
+
+
+
+
+/*
+函数功能：任务1
+参数：无
+返回值：无
+影响值：无
+
+作者：刘要坤
+时间：2020年1月6日10:18:38
+
+修改记录：
+
+*/
+static int thread1_entry(struct pt *pt){//手动控制任务
+  
+  PT_BEGIN(pt);
+  
+  while (1){
+    while(__autoFlag == 0){//手动驾驶模式
+      
+      if(__changeModeFlag == 1){//自动切手动
+        __changeModeFlag = 0;
+        __MoonRoverRun(0,0);
+      }
+      
+      __MoonRoverGetConmmunication();
+	  __MoonRoverGetTelecomm();
+
+    }
+  PT_TIMER_DELAY(pt,100); __MoonRoverGetConmmunication(); 
+  }
+  PT_END(pt);
+}
+
+
+
+/*
+函数功能：任务2
+参数：无
+返回值：无
+影响值：无
+
+作者：刘要坤
+时间：2020年1月6日10:18:38
+
+修改记录：
+
+*/
+static int thread2_entry(struct pt *pt){
+  
+  PT_BEGIN(pt);
+  
+  while (1){
+   PT_TIMER_DELAY(pt,10);   __MoonRoverGetConmmunication();
+  }
+
+  PT_END(pt);
+}
+
+
+
+
+
+/*
+函数功能：创建任务
+参数：无
+返回值：无
+影响值：无
+
+作者：刘要坤
+时间：2020年1月6日10:18:38
+
+修改记录：
+
+*/
+void __MoonRoverCreateTask(void){
+	thread1_entry(&thread1);
+	thread2_entry(&thread2); 
+
+	if(__autoFlag == 1)     
+	if(__changeModeFlag == 0){//手动切自动
+	    __changeModeFlag = 1;
+	    __MoonRoverRun(0,0);
+	  }
+}
+
+
+
+
+
+/*
+函数功能：开启非拍照时刻遥测
+参数：无
+返回值：无
+影响值：电机运行及其他指令
+
+作者：刘要坤
+时间：2020年1月7日17:23:05
+
+修改记录：
+
+*/
+void __MoonRoverGetTelecomm(void){
+
+  if(__camFlag != 1){
+      __MoonRoverGetData();
+    
+      if(millis() - __timeFlagTele > 150){//发送遥测数据时间间隔     
+        __timeFlagTele = millis();        
+
+        if(__motorFlag){//输出电机位置信息
+          __motorFlag = 0;
+          __MoonRoverReturnMotorData();
+        }
+        else if(__motorFlag == 0){//其余遥测量
+          __MoonRoverOrderData();
+          __motorFlag = 1;
+        
+        }
+     }
+  }
+}
+
+
+
+
+
+/*
+函数功能：开启通讯
+参数：无
+返回值：无
+影响值：电机运行及其他指令
+
+作者：刘要坤
+时间：2020年1月7日17:23:05
+
+修改记录：
+
+*/
+void __MoonRoverGetConmmunication(void){
+    getTeleComm2();
+    getTeleComm3();
+}
+
+/*
+函数功能：运算数据
+参数：无
+返回值：无
+影响值：全局返回值
+
+作者：刘要坤
+时间：2020年1月7日17:23:05
+
+修改记录：
+
+*/
+void __MoonRoverGetData(void){
+	getData();
+}
+
+/*
+函数功能：请求数据
+参数：无
+返回值：无
+影响值：全局返回值
+
+作者：刘要坤
+时间：2020年1月7日17:23:05
+
+修改记录：
+
+*/
+void __MoonRoverOrderData(void){
+	orderData();
+}
+
+
+/*
+函数功能：返回电机状态数据
+参数：无
+返回值：无
+影响值：无
+
+作者：刘要坤
+时间：2020年1月7日17:23:05
+
+修改记录：
+
+*/
+void __MoonRoverReturnMotorData(void){
+	printMotorDataHex();
+}
 
 /*
 函数功能：控制车体整体前进或后退
@@ -353,7 +577,7 @@ float __MoonRoverGetBattaryVolt(void){
 修改记录：
 
 */
-long __MoonRoverGetDistance(void){
+float __MoonRoverGetDistance(void){
 	return getDistant();
 }
 
